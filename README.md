@@ -1,4 +1,4 @@
-# BitlyClone Backend
+# URLShortener Backend
 
 Backend service for a modern URL shortener, built with **ASP.NET Core Web API**, **Entity Framework Core**, and **SQL Server** using **layered architecture**.
 
