@@ -16,5 +16,8 @@ namespace URLShortener_Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; }
 
+        public ICollection<ShortUrl> ShortUrls { get; set; } = new List<ShortUrl>();
+
+
     }
 }
