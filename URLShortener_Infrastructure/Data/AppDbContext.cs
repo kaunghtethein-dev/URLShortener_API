@@ -23,6 +23,8 @@ namespace URLShortener_Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new ShortUrlConfiguration());
+            modelBuilder.ApplyConfiguration(new ClickAnalyticsConfiguration());
         }
 
     }

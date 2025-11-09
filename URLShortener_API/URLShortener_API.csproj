@@ -18,12 +18,11 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
-    <Folder Include="Repositories\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\URLShortener_Application\URLShortener_Application.csproj" />
+    <ProjectReference Include="..\URLShortener_Infrastructure\URLShortener_Infrastructure.csproj" />
     <ProjectReference Include="..\URLShortener_Shared\URLShortener_Shared.csproj" />
   </ItemGroup>
 
