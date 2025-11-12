@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using URLShortener_Application.Interfaces.Repositories;
 using URLShortener_Application.Interfaces.Services;
+using URLShortener_Application.Interfaces.Services.Auth;
 using URLShortener_Domain.Entities;
 using URLShortener_Shared.DTOs;
 
@@ -13,10 +14,12 @@ namespace URLShortener_Application.Services
     public class UserService:IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly JwtTokenGenerator _jwtTokenGenerator;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, JwtTokenGenerator jwtTokenGenerator)
         {
             _userRepository = userRepository;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
 
         public async Task<Dto_User?> GetUserByIdAsync(int id)
@@ -75,6 +78,29 @@ namespace URLShortener_Application.Services
             _userRepository.Delete(user);
             await _userRepository.SaveChangesAsync();
             return true;
+        }
+        public async Task<Dto_User?> GetUserByEmailAsync(string email)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user == null) return null;
+
+            return new Dto_User
+            {
+                UserId = user.UserId,
+                UserName = user.UserName,
+                Email = user.Email,
+                IsActive = user.IsActive
+            };
+        }
+        public async Task<string?> LoginUserAsync(Dto_LoginUser dto)
+        {
+            var user = await _userRepository.GetByEmailAsync(dto.Email);
+
+            if (user == null || user.Password != dto.Password)
+                return null;
+
+
+            return _jwtTokenGenerator.GenerateToken(user);
         }
     }
 }

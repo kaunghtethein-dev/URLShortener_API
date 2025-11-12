@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.9" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\URLShortener_Domain\URLShortener_Domain.csproj" />
     <ProjectReference Include="..\URLShortener_Shared\URLShortener_Shared.csproj" />
   </ItemGroup>

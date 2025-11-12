@@ -13,5 +13,9 @@ namespace URLShortener_Application.Interfaces.Services
         Task<IEnumerable<Dto_User>> GetAllUsersAsync();
         Task<Dto_User> CreateUserAsync(Dto_CreateUser dto);
         Task<bool> DeleteUserAsync(int id);
+        Task<string?> LoginUserAsync(Dto_LoginUser dto);
+        Task<Dto_User?> GetUserByEmailAsync(string email);
+
+
     }
 }
