@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,11 +16,13 @@ namespace URLShortener_Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
+        private readonly PasswordHasher<User> _passwordHasher;
 
         public UserService(IUserRepository userRepository, JwtTokenGenerator jwtTokenGenerator)
         {
             _userRepository = userRepository;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _passwordHasher = new PasswordHasher<User>();
         }
 
         public async Task<Dto_User?> GetUserByIdAsync(int id)
@@ -54,9 +57,9 @@ namespace URLShortener_Application.Services
             {
                 UserName = dto.UserName,
                 Email = dto.Email,
-                Password = dto.Password, // TODO: hash later
                 IsActive = true
             };
+            user.Password = _passwordHasher.HashPassword(user,dto.Password);
 
             await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
@@ -96,9 +99,10 @@ namespace URLShortener_Application.Services
         {
             var user = await _userRepository.GetByEmailAsync(dto.Email);
 
-            if (user == null || user.Password != dto.Password)
-                return null;
+            if (user == null) return null;
 
+            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, dto.Password);
+            if (result == PasswordVerificationResult.Failed) return null;
 
             return _jwtTokenGenerator.GenerateToken(user);
         }
