@@ -45,6 +45,7 @@ if (jwtSettings != null)
 // Register Infrastructure & Application services
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IShortUrlService, ShortUrlService>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 
 // Enable Swagger
