@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using URLShortener_Application.Interfaces.Repositories;
 using URLShortener_Application.Interfaces.Services;
@@ -22,12 +23,15 @@ namespace URLShortener_Application.Services
         public async Task<Dto_ShortUrl> CreateShortUrlAsync(Dto_CreateShortUrl dto)
         {
             // If custom alias is provided, check if it already exists
-            string shortCode;
+            string shortCode = string.Empty;
             if (!string.IsNullOrWhiteSpace(dto.CustomAlias))
             {
                 var existing = await _shortUrlRepository.GetByShortCodeAsync(dto.CustomAlias);
                 if (existing != null)
+                {
                     throw new Exception("Custom alias is already in use.");
+                }
+                    
 
                 shortCode = dto.CustomAlias;
             }
@@ -67,6 +71,42 @@ namespace URLShortener_Application.Services
 
             return createdDto;
         }
+
+        public async Task<bool> DeleteShortUrlAsync(long id, int currentUserId)
+        {
+            var entity = await _shortUrlRepository.GetByIdAsync(id);
+            if (entity == null) return false;
+
+            if (entity.UserId == null || entity.UserId != currentUserId)
+            {
+                //Intentionally throw UnauthorizedAccessException because API want to return 403 Forbidden
+                throw new UnauthorizedAccessException("You are not allowed to delete this short URL.");
+            }
+                
+
+            _shortUrlRepository.Delete(entity);
+            await _shortUrlRepository.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<Dto_ShortUrl?> GetByIdAsync(long id)
+        {
+            var entity = await _shortUrlRepository.GetByIdAsync(id);
+            if (entity == null) return null;
+            return new Dto_ShortUrl
+            {
+                ShortUrlId = entity.ShortUrlId,
+                OriginalUrl = entity.OriginalUrl,
+                ShortCode = entity.ShortCode,
+                CustomAlias = entity.CustomAlias,
+                CreatedAt = entity.CreatedAt,
+                ExpiresAt = entity.ExpiresAt,
+                IsActive = entity.IsActive,
+                ClickCount = entity.ClickCount,
+                UserId = entity.UserId
+            };
+        }
+
         public async Task<Dto_ShortUrl?> GetByShortCodeAsync(string shortCode)
         {
             var result = await _shortUrlRepository.GetByShortCodeAsync(shortCode);
@@ -106,6 +146,93 @@ namespace URLShortener_Application.Services
                 }).ToList();
             }
             return dtos;
+        }
+
+        public async Task<bool> SetActiveStatusAsync(long id, bool isActive, int currentUserId)
+        {
+            var entity = await _shortUrlRepository.GetByIdAsync(id);
+            if (entity == null) return false;
+
+            if (entity.UserId == null || entity.UserId != currentUserId)
+            {
+                throw new UnauthorizedAccessException("You are not allowed to modify this short URL.");
+            }
+                
+            entity.IsActive = isActive;
+            _shortUrlRepository.Update(entity);
+            await _shortUrlRepository.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<Dto_ShortUrl?> UpdateShortUrlAsync(Dto_UpdateShortUrl dto, int currentUserId)
+        {
+            
+            var entity = await _shortUrlRepository.GetByIdAsync(dto.ShortUrlId);
+            if (entity == null) return null;
+
+            // Only owner can update. Guest links (UserId == null) cannot be edited.
+            if (entity.UserId == null || entity.UserId != currentUserId)
+            {
+                throw new UnauthorizedAccessException("You are not allowed to update this short URL.");
+            }
+               
+            // Validate OriginalUrl
+            if (string.IsNullOrWhiteSpace(dto.OriginalUrl) || !Uri.TryCreate(dto.OriginalUrl, UriKind.Absolute, out _))
+            {
+                throw new ArgumentException("Invalid original URL.");
+            }
+               
+
+            // Validate custom alias if provided and changed
+            if (!string.IsNullOrWhiteSpace(dto.CustomAlias) && !string.Equals(dto.CustomAlias, entity.CustomAlias, StringComparison.Ordinal))
+            {
+                if (!Regex.IsMatch(dto.CustomAlias, "^[a-zA-Z0-9_-]+$"))
+                {
+                    throw new ArgumentException("Custom alias can only contain letters, numbers, hyphens, and underscores.");
+                }
+                    
+                //Check if alias already exists
+                var aliasExists = await _shortUrlRepository.GetByShortCodeAsync(dto.CustomAlias);
+                if (aliasExists != null && aliasExists.ShortUrlId != entity.ShortUrlId)
+                {
+                    throw new ArgumentException("Custom alias is already in use.");
+                }
+                    
+
+                // Apply new custom alias
+                entity.CustomAlias = dto.CustomAlias;
+                entity.ShortCode = dto.CustomAlias; 
+            }
+            else if (string.IsNullOrWhiteSpace(dto.CustomAlias) && !string.IsNullOrWhiteSpace(entity.CustomAlias))
+            {
+                // User removed custom alias => Revert to generated code
+                entity.CustomAlias = null;
+                entity.ShortCode = ShortCodeGenerator.Encode(entity.ShortUrlId);
+            }
+            
+            entity.OriginalUrl = dto.OriginalUrl;
+            entity.ExpiresAt = dto.ExpiresAt;
+
+            if (dto.IsActive != null)
+            {
+                entity.IsActive = dto.IsActive.Value;
+            }
+                
+            _shortUrlRepository.Update(entity);
+            await _shortUrlRepository.SaveChangesAsync();
+
+            return new Dto_ShortUrl
+            {
+                ShortUrlId = entity.ShortUrlId,
+                OriginalUrl = entity.OriginalUrl,
+                ShortCode = entity.ShortCode,
+                CustomAlias = entity.CustomAlias,
+                CreatedAt = entity.CreatedAt,
+                ExpiresAt = entity.ExpiresAt,
+                IsActive = entity.IsActive,
+                ClickCount = entity.ClickCount,
+                UserId = entity.UserId
+            };
         }
     }
 }
