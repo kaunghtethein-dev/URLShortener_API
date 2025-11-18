@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace URLShortener_Application.Interfaces.Services.Helpers
+namespace URLShortener_Application.Services.Helpers
 {
-    public static  class ShortCodeGenerator
+    public static class ShortCodeGenerator
     {
         private const string Base62Chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private const long XorSalt = 979620910123; 
+        private const long XorSalt = 9796209103;
 
         public static string Encode(long id)
         {
@@ -34,8 +34,8 @@ namespace URLShortener_Application.Interfaces.Services.Helpers
             Array.Reverse(charArray);
             string base62 = new string(charArray);
 
-            // Ensure minimum length of 6 characters
-            return base62.PadLeft(6, '0');
+            // Ensure minimum length of 5 characters
+            return base62.PadLeft(5, '0');
         }
     }
 }

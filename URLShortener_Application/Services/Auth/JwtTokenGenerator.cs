@@ -1,17 +1,16 @@
 ﻿using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
 using URLShortener_Application.Settings;
 using URLShortener_Domain.Entities;
-using Microsoft.IdentityModel.Tokens;
 
-
-namespace URLShortener_Application.Interfaces.Services.Auth
+namespace URLShortener_Application.Services.Auth
 {
     public class JwtTokenGenerator
     {

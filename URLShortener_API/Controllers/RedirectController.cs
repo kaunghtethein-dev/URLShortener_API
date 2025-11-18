@@ -33,7 +33,7 @@ namespace URLShortener_API.Controllers
             if (originalUrl.ExpiresAt != null && originalUrl.ExpiresAt <= DateTime.UtcNow)
             {
                 return StatusCode(StatusCodes.Status410Gone,
-                    DataResult<string>.FailResult("This URL has expired", StatusCodes.Status410Gone));
+                    DataResult<string>.FailResult($"This URL has expired.", StatusCodes.Status410Gone));
             }
             return Redirect(originalUrl.OriginalUrl);
         }

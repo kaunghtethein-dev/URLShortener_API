@@ -11,7 +11,7 @@ namespace URLShortener_Shared.DTOs
         public long ShortUrlId { get; set; }
         public string OriginalUrl { get; set; } = string.Empty;
         public string? CustomAlias { get; set; }
-        public DateTime? ExpiresAt { get; set; }
+        public DateTime? ExpiresAt { get; set; } = null;
         public bool? IsActive { get; set; }
     }
 }

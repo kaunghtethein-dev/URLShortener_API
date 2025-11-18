@@ -16,5 +16,6 @@ namespace URLShortener_Application.Interfaces.Services
         Task<Dto_ShortUrl?> UpdateShortUrlAsync(Dto_UpdateShortUrl dto, int currentUserId);
         Task<bool> DeleteShortUrlAsync(long id, int currentUserId);
         Task<bool> SetActiveStatusAsync(long id, bool isActive, int currentUserId);
+        Task<byte[]?> GenerateQrCodeAsync(string shortCode);
     }
 }

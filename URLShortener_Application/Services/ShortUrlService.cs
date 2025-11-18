@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using URLShortener_Application.Interfaces.Repositories;
 using URLShortener_Application.Interfaces.Services;
 using URLShortener_Application.Interfaces.Services.Helpers;
+using URLShortener_Application.Services.Helpers;
 using URLShortener_Domain.Entities;
 using URLShortener_Shared.DTOs;
 
@@ -15,62 +16,72 @@ namespace URLShortener_Application.Services
     public class ShortUrlService: IShortUrlService
     {
         private readonly IShortUrlRepository _shortUrlRepository;
+        private readonly IQrCodeGenerator _qrCodeGenerator;
 
-        public ShortUrlService(IShortUrlRepository shortUrlRepository)
+        public ShortUrlService(IShortUrlRepository shortUrlRepository, IQrCodeGenerator qrCodeGenerator)
         {
             _shortUrlRepository = shortUrlRepository;
+            _qrCodeGenerator = qrCodeGenerator;
         }
+
         public async Task<Dto_ShortUrl> CreateShortUrlAsync(Dto_CreateShortUrl dto)
         {
-            // If custom alias is provided, check if it already exists
             string shortCode = string.Empty;
+
+            ShortUrl shortUrl = new ShortUrl
+            {
+                OriginalUrl = dto.OriginalUrl,
+                UserId = dto.UserId,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = dto.ExpiresAt,
+                IsActive = true
+            };
+            if (string.IsNullOrWhiteSpace(dto.OriginalUrl) || !Uri.TryCreate(dto.OriginalUrl, UriKind.Absolute, out _))
+            {
+                throw new ArgumentException("Invalid original URL.");
+            }
+            // Case 1 — Custom alias provided
             if (!string.IsNullOrWhiteSpace(dto.CustomAlias))
             {
                 var existing = await _shortUrlRepository.GetByShortCodeAsync(dto.CustomAlias);
                 if (existing != null)
-                {
                     throw new Exception("Custom alias is already in use.");
-                }
-                    
 
-                shortCode = dto.CustomAlias;
+                shortCode = dto.CustomAlias;    
+                shortUrl.ShortCode = shortCode; 
+
+                await _shortUrlRepository.AddAsync(shortUrl);
+                await _shortUrlRepository.SaveChangesAsync();
             }
             else
             {
-                // Generate short code from Id
-                var shortUrl = new ShortUrl
-                {
-                    OriginalUrl = dto.OriginalUrl,
-                    UserId = dto.UserId,
-                    CreatedAt = DateTime.UtcNow,
-                    ExpiresAt = dto.ExpiresAt,
-                    IsActive = true
-                };
+                // Case 2 — Auto-generate
 
                 await _shortUrlRepository.AddAsync(shortUrl);
                 await _shortUrlRepository.SaveChangesAsync();
 
                 shortCode = ShortCodeGenerator.Encode(shortUrl.ShortUrlId);
+
                 shortUrl.ShortCode = shortCode;
                 _shortUrlRepository.Update(shortUrl);
                 await _shortUrlRepository.SaveChangesAsync();
             }
 
             // Map to DTO
-            var createdDto = new Dto_ShortUrl
+            return new Dto_ShortUrl
             {
-                OriginalUrl = dto.OriginalUrl,
+                ShortUrlId = shortUrl.ShortUrlId,
+                OriginalUrl = shortUrl.OriginalUrl,
+                ShortCode = shortUrl.ShortCode,
                 CustomAlias = dto.CustomAlias,
-                ShortCode = shortCode,
-                ExpiresAt = dto.ExpiresAt,
-                UserId = dto.UserId,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
+                UserId = shortUrl.UserId,
+                CreatedAt = shortUrl.CreatedAt,
+                ExpiresAt = shortUrl.ExpiresAt,
+                IsActive = shortUrl.IsActive,
                 ClickCount = 0
             };
-
-            return createdDto;
         }
+
 
         public async Task<bool> DeleteShortUrlAsync(long id, int currentUserId)
         {
@@ -88,6 +99,24 @@ namespace URLShortener_Application.Services
             await _shortUrlRepository.SaveChangesAsync();
             return true;
         }
+
+        public async Task<byte[]?> GenerateQrCodeAsync(string shortCode)
+        {
+            var shortUrl = await _shortUrlRepository.GetByShortCodeAsync(shortCode);
+            if (shortUrl == null) return null;
+                
+
+            if (!shortUrl.IsActive || (shortUrl.ExpiresAt!=null && shortUrl.ExpiresAt.Value < DateTime.UtcNow))
+            {
+                throw new InvalidOperationException("EXPIRED");
+            }
+                
+
+            string fullShortUrl = $"https://myshortener.com/{shortUrl.ShortCode}";
+
+            return _qrCodeGenerator.GenerateQrCode(fullShortUrl);
+        }
+
 
         public async Task<Dto_ShortUrl?> GetByIdAsync(long id)
         {

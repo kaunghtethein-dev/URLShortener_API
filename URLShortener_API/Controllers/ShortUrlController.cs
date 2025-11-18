@@ -35,6 +35,10 @@ namespace URLShortener_API.Controllers
 
                 return Ok(DataResult<Dto_ShortUrl>.SuccessResult(created, "Short URL created successfully", StatusCodes.Status200OK));
             }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(DataResult<Dto_ShortUrl>.FailResult(ex.Message, StatusCodes.Status400BadRequest));
+            }
             catch (Exception ex) 
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, DataResult<Dto_ShortUrl>.FailResult(ex.Message, StatusCodes.Status500InternalServerError));
@@ -230,5 +234,26 @@ namespace URLShortener_API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, DataResult<object>.FailResult(ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
+        [HttpGet("qr/{shortCode}")]
+        public async Task<ActionResult> GetQrCode(string shortCode)
+        {
+            try
+            {
+                var bytes = await _shortUrlService.GenerateQrCodeAsync(shortCode);
+
+                if (bytes == null)
+                {
+                    return NotFound(DataResult<string>.FailResult("URL Not Found", StatusCodes.Status404NotFound));
+                }
+                   
+                return File(bytes, "image/png");
+            }
+            catch (InvalidOperationException ex) when (ex.Message == "EXPIRED")
+            {
+                return StatusCode(StatusCodes.Status410Gone,
+                    DataResult<string>.FailResult("Short URL expired or inactive", StatusCodes.Status410Gone));
+            }
+        }
+
     }
 }

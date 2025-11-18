@@ -3,8 +3,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using URLShortener_Application.Interfaces.Services;
-using URLShortener_Application.Interfaces.Services.Auth;
+using URLShortener_Application.Interfaces.Services.Helpers;
 using URLShortener_Application.Services;
+using URLShortener_Application.Services.Auth;
+using URLShortener_Application.Services.Helpers;
 using URLShortener_Application.Settings;
 using URLShortener_Infrastructure;
 
@@ -46,7 +48,10 @@ if (jwtSettings != null)
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShortUrlService, ShortUrlService>();
+builder.Services.AddScoped<IQrCodeGenerator, QrCodeGenerator>();
+
 builder.Services.AddScoped<JwtTokenGenerator>();
+
 
 // Enable Swagger
 builder.Services.AddEndpointsApiExplorer();
