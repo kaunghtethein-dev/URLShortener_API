@@ -10,11 +10,13 @@ namespace URLShortener_Application.Interfaces.Services
     public interface IUserService
     {
         Task<Dto_User?> GetUserByIdAsync(int id);
+        Task<Dto_User?> GetUserByEmailAsync(string email);
         Task<IEnumerable<Dto_User>> GetAllUsersAsync();
         Task<Dto_User> CreateUserAsync(Dto_CreateUser dto);
         Task<bool> DeleteUserAsync(int id);
-        Task<string?> LoginUserAsync(Dto_LoginUser dto);
-        Task<Dto_User?> GetUserByEmailAsync(string email);
+        Task<Dto_AuthResponse?> LoginUserAsync(Dto_LoginUser dto);
+        Task<Dto_AuthResponse?> RefreshTokenAsync(string refreshToken);
+        
 
 
     }

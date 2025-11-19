@@ -17,6 +17,7 @@ namespace URLShortener_Domain.Entities
         public bool IsActive { get; set; }
 
         public ICollection<ShortUrl> ShortUrls { get; set; } = new List<ShortUrl>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
 
     }

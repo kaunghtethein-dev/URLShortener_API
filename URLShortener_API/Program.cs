@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using URLShortener_Application.Interfaces.Repositories;
 using URLShortener_Application.Interfaces.Services;
 using URLShortener_Application.Interfaces.Services.Helpers;
 using URLShortener_Application.Services;
@@ -9,6 +10,7 @@ using URLShortener_Application.Services.Auth;
 using URLShortener_Application.Services.Helpers;
 using URLShortener_Application.Settings;
 using URLShortener_Infrastructure;
+using URLShortener_Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -47,26 +47,53 @@ namespace URLShortener_API.Controllers
 
         // Log in existing user, POST: api/user/login
         [HttpPost("login")]
-        public async Task<ActionResult<DataResult<string>>> LoginUser([FromBody] Dto_LoginUser dto)
+        public async Task<ActionResult<DataResult<Dto_AuthResponse>>> LoginUser([FromBody] Dto_LoginUser dto)
         {
             try
             {
                 if (!ModelState.IsValid)
+                {
                     return BadRequest(DataResult<string>.FailResult("Invalid input", StatusCodes.Status400BadRequest));
+                }
 
-                var token = await _userService.LoginUserAsync(dto);
+                var auth = await _userService.LoginUserAsync(dto);
 
-                if (string.IsNullOrEmpty(token))
+                if (auth == null)
                 {
                     return Unauthorized(DataResult<string>.FailResult("Invalid email or password", StatusCodes.Status401Unauthorized));
                 }
 
-                return Ok(DataResult<string>.SuccessResult(token, "Login successful", StatusCodes.Status200OK));
+                return Ok(DataResult<Dto_AuthResponse>.SuccessResult(auth, "Login successful", StatusCodes.Status200OK));
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, DataResult<string>.FailResult(ex.Message, StatusCodes.Status500InternalServerError));
             }
-           
+        }
+
+        [HttpPost("refresh")]
+        public async Task<ActionResult<DataResult<Dto_AuthResponse>>> RefreshToken([FromBody] Dto_RefreshRequest dto)
+        {
+            try
+            {
+                if (dto == null || string.IsNullOrWhiteSpace(dto.RefreshToken))
+                {
+                    return BadRequest(DataResult<string>.FailResult("Refresh token required", StatusCodes.Status400BadRequest));
+                }
+
+                var auth = await _userService.RefreshTokenAsync(dto.RefreshToken);
+
+                if (auth == null)
+                {
+                    return Unauthorized(DataResult<string>.FailResult("Invalid or expired refresh token", StatusCodes.Status401Unauthorized));
+                }
+
+                return Ok(DataResult<Dto_AuthResponse>.SuccessResult(auth, "Token refreshed", StatusCodes.Status200OK));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, DataResult<string>.FailResult(ex.Message, StatusCodes.Status500InternalServerError));
+            }
         }
         // GET: api/user/getuser
         [Authorize]

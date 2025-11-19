@@ -22,7 +22,7 @@ namespace URLShortener_Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IShortUrlRepository, ShortUrlRepository>();
             services.AddScoped<IClickAnalyticsRepository, ClickAnalyticsRepository>();
-
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             return services;
         }
     }
