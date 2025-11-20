@@ -141,6 +141,7 @@ namespace URLShortener_Application.Services
                 AccessToken = accessToken,
                 RefreshToken = rawRefreshToken,
                 AccessTokenExpiresAt = accessTokenExpiresAt,
+                UserId = user.UserId,
                 UserName = user.UserName,
                 Email = user.Email
             };
