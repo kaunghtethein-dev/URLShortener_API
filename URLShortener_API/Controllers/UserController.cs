@@ -7,6 +7,7 @@ using URLShortener_Shared.Wrappers;
 
 namespace URLShortener_API.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {

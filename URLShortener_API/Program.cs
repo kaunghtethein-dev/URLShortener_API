@@ -13,7 +13,16 @@ using URLShortener_Infrastructure;
 using URLShortener_Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-
+// CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 // Add controllers
 builder.Services.AddControllers();
 
@@ -97,7 +106,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowAll");
 // Enable Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();

@@ -23,7 +23,10 @@ namespace URLShortener_API.Controllers
             try
             {
                 if (!ModelState.IsValid)
+                {
                     return BadRequest(DataResult<Dto_ShortUrl>.FailResult("Invalid input", StatusCodes.Status400BadRequest));
+                }
+                   
 
                 var created = await _shortUrlService.CreateShortUrlAsync(dto);
 
