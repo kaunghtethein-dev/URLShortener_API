@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using URLShortener_Application.Interfaces.Services;
 using URLShortener_Shared.DTOs;
 using URLShortener_Shared.Wrappers;
+using static URLShortener_Application.CustomExceptions.CustomExceptions;
 
 namespace URLShortener_API.Controllers
 {
@@ -42,9 +44,13 @@ namespace URLShortener_API.Controllers
             {
                 return BadRequest(DataResult<Dto_ShortUrl>.FailResult(ex.Message, StatusCodes.Status400BadRequest));
             }
+            catch(AlreadyExistsException ex)
+            {
+                return  Ok(DataResult<Dto_ShortUrl>.FailResult(ex.Message,StatusCodes.Status200OK));
+            }
             catch (Exception ex) 
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, DataResult<Dto_ShortUrl>.FailResult(ex.Message, StatusCodes.Status500InternalServerError));
+                return StatusCode(StatusCodes.Status500InternalServerError, DataResult<Dto_ShortUrl>.FailResult(ex.InnerException?.Message??ex.Message, StatusCodes.Status500InternalServerError));
             }
            
         }

@@ -45,6 +45,17 @@ namespace URLShortener_API.Controllers
            
 
         }
+        // Check if there is already a user with the email
+        [HttpGet("checkuserexist/{email}")]
+        public async Task<ActionResult<DataResult<bool>>> CheckUserAlreadyExists(string email)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(DataResult<string>.FailResult("Invalid input", StatusCodes.Status400BadRequest));
+            }
+            var userAlreadyExists = await _userService.CheckUserAlreadyExists(email);
+            return Ok(DataResult<bool>.SuccessResult(userAlreadyExists,"", StatusCodes.Status200OK));
+        }
 
         // Log in existing user, POST: api/user/login
         [HttpPost("login")]
@@ -61,7 +72,7 @@ namespace URLShortener_API.Controllers
 
                 if (auth == null)
                 {
-                    return Unauthorized(DataResult<string>.FailResult("Invalid email or password", StatusCodes.Status401Unauthorized));
+                    return Ok(DataResult<string>.FailResult("Invalid email or password", StatusCodes.Status401Unauthorized));
                 }
 
                 return Ok(DataResult<Dto_AuthResponse>.SuccessResult(auth, "Login successful", StatusCodes.Status200OK));

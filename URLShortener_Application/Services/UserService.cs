@@ -102,6 +102,11 @@ namespace URLShortener_Application.Services
                 IsActive = user.IsActive
             };
         }
+        public async Task<bool> CheckUserAlreadyExists(string email)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            return user != null; //return true if there is already a user with the email
+        }
         public async Task<Dto_AuthResponse?> LoginUserAsync(Dto_LoginUser dto)
         {
             var user = await _userRepository.GetByEmailAsync(dto.Email);

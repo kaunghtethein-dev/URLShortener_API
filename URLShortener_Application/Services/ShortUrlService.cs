@@ -10,6 +10,7 @@ using URLShortener_Application.Interfaces.Services.Helpers;
 using URLShortener_Application.Services.Helpers;
 using URLShortener_Domain.Entities;
 using URLShortener_Shared.DTOs;
+using static URLShortener_Application.CustomExceptions.CustomExceptions;
 
 namespace URLShortener_Application.Services
 {
@@ -45,7 +46,7 @@ namespace URLShortener_Application.Services
             {
                 var existing = await _shortUrlRepository.GetByShortCodeAsync(dto.CustomAlias);
                 if (existing != null)
-                    throw new Exception("Custom alias is already in use.");
+                    throw new AlreadyExistsException("Custom alias is already in use.");
 
                 shortCode = dto.CustomAlias;    
                 shortUrl.ShortCode = shortCode; 

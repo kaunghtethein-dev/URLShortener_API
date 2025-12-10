@@ -16,7 +16,7 @@ namespace URLShortener_Application.Interfaces.Services
         Task<bool> DeleteUserAsync(int id);
         Task<Dto_AuthResponse?> LoginUserAsync(Dto_LoginUser dto);
         Task<Dto_AuthResponse?> RefreshTokenAsync(string refreshToken);
-        
+        Task<bool> CheckUserAlreadyExists(string email);
 
 
     }

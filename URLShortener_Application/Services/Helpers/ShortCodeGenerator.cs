@@ -8,34 +8,41 @@ namespace URLShortener_Application.Services.Helpers
 {
     public static class ShortCodeGenerator
     {
-        private const string Base62Chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        private const string Base36Chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+        private const int Base = 36;
+
+
         private const long XorSalt = 9796209103;
 
         public static string Encode(long id)
         {
+
             long salted = id ^ XorSalt;
 
             var sb = new StringBuilder();
+
             if (salted == 0)
             {
-                sb.Append(Base62Chars[0]);
+                sb.Append(Base36Chars[0]);
             }
             else
             {
                 while (salted > 0)
                 {
-                    int remainder = (int)(salted % 62);
-                    sb.Append(Base62Chars[remainder]);
-                    salted /= 62;
+                    int remainder = (int)(salted % Base);
+                    sb.Append(Base36Chars[remainder]);
+                    salted /= Base;
                 }
             }
 
+            // Reverse to get correct order
             var charArray = sb.ToString().ToCharArray();
             Array.Reverse(charArray);
-            string base62 = new string(charArray);
+            string base36 = new string(charArray);
 
-            // Ensure minimum length of 5 characters
-            return base62.PadLeft(5, '0');
+            // Ensure minimum length of 5 characters 
+            return base36.PadLeft(5, '0');
         }
     }
 }
