@@ -17,5 +17,6 @@ namespace URLShortener_Application.Interfaces.Services
         Task<bool> DeleteShortUrlAsync(long id, int currentUserId);
         Task<bool> SetActiveStatusAsync(long id, bool isActive, int currentUserId);
         Task<byte[]?> GenerateQrCodeAsync(string shortCode);
+        Task<string?> HandleRedirectAsync(string shortCode,string? ip,string? referrer,string? userAgent);
     }
 }

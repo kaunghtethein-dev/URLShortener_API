@@ -13,6 +13,8 @@ using URLShortener_Infrastructure;
 using URLShortener_Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpClient<IGeoService, GeoService>();
 // CORS policy
 builder.Services.AddCors(options =>
 {
@@ -60,7 +62,6 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShortUrlService, ShortUrlService>();
 builder.Services.AddScoped<IQrCodeGenerator, QrCodeGenerator>();
-
 builder.Services.AddScoped<JwtTokenGenerator>();
 
 

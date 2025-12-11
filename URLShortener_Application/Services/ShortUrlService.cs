@@ -17,12 +17,16 @@ namespace URLShortener_Application.Services
     public class ShortUrlService: IShortUrlService
     {
         private readonly IShortUrlRepository _shortUrlRepository;
+        private readonly IClickAnalyticsRepository _clickRepository;
         private readonly IQrCodeGenerator _qrCodeGenerator;
+        private readonly IGeoService _geoService;
 
-        public ShortUrlService(IShortUrlRepository shortUrlRepository, IQrCodeGenerator qrCodeGenerator)
+        public ShortUrlService(IShortUrlRepository shortUrlRepository, IQrCodeGenerator qrCodeGenerator, IClickAnalyticsRepository clickRepository, IGeoService geoService)
         {
             _shortUrlRepository = shortUrlRepository;
             _qrCodeGenerator = qrCodeGenerator;
+            _clickRepository = clickRepository;
+            _geoService = geoService;
         }
 
         public async Task<Dto_ShortUrl> CreateShortUrlAsync(Dto_CreateShortUrl dto)
@@ -264,5 +268,43 @@ namespace URLShortener_Application.Services
                 UserId = entity.UserId
             };
         }
+        public async Task<string?> HandleRedirectAsync(string shortCode,string? ip, string? referrer, string? userAgent)
+        {
+            var shortUrl = await _shortUrlRepository.GetByShortCodeAsync(shortCode);
+
+            if (shortUrl == null)
+            {
+                return null;
+            }
+
+            if (!shortUrl.IsActive || (shortUrl.ExpiresAt.HasValue && shortUrl.ExpiresAt < DateTime.UtcNow))
+            {
+                throw new InvalidOperationException("EXPIRED");
+            }
+
+            // Increment click count
+            shortUrl.ClickCount += 1;
+
+            string? country = await _geoService.ResolveCountryAsync(ip);
+            string device = DeviceDetector.Detect(userAgent);
+            string userAgentBrowser = UserAgentHelper.GetUserAgentBrowser(userAgent);
+            // Add analytics entry
+            var analytics = new ClickAnalytics
+            {
+                ShortUrlId = shortUrl.ShortUrlId,
+                Referrer = referrer,
+                UserAgent = userAgentBrowser,
+                Country = country,
+                DeviceType = device,
+                IpAddress = ip
+            };
+
+            await _clickRepository.AddAsync(analytics);
+            await _clickRepository.SaveChangesAsync();
+            await _shortUrlRepository.SaveChangesAsync();
+
+            return shortUrl.OriginalUrl;
+        }
+
     }
 }

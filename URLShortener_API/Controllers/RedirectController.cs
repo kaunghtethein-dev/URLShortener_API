@@ -18,24 +18,35 @@ namespace URLShortener_API.Controllers
         [HttpGet("{shortCode}")]
         public async Task<ActionResult> RedirectToOriginal(string shortCode)
         {
-            var originalUrl = await _shortUrlService.GetByShortCodeAsync(shortCode);
+            try
+            {
+                var ip = GetClientIp();
+                string referrer = Request.Headers["Referer"].ToString();
+                string userAgent = Request.Headers["User-Agent"].ToString();
 
-            if (originalUrl == null)
-            {
-                return NotFound(DataResult<IEnumerable<string>>.FailResult("URL Not Found", StatusCodes.Status404NotFound));
-            }
-            if (!originalUrl.IsActive)
-            {
-                return StatusCode(StatusCodes.Status410Gone,
-                    DataResult<string>.FailResult("This URL is inactive", StatusCodes.Status410Gone));
-            }
 
-            if (originalUrl.ExpiresAt != null && originalUrl.ExpiresAt <= DateTime.UtcNow)
-            {
-                return StatusCode(StatusCodes.Status410Gone,
-                    DataResult<string>.FailResult($"This URL has expired.", StatusCodes.Status410Gone));
+                var url = await _shortUrlService.HandleRedirectAsync(shortCode,ip, referrer, userAgent);
+
+                if (url == null)
+                {
+                    return NotFound("Short link not found");
+                }
+
+                return Redirect(url);
             }
-            return Redirect(originalUrl.OriginalUrl);
+            catch (InvalidOperationException ex) when (ex.Message == "EXPIRED")
+            {
+                return StatusCode(StatusCodes.Status410Gone, "This short URL has expired");
+            }
+        }
+
+        private string? GetClientIp()
+        {
+            if (Request.Headers.TryGetValue("CF-Connecting-IP", out var cfIp))
+            {
+                return cfIp.ToString();
+            }
+            return HttpContext.Connection.RemoteIpAddress?.ToString();
         }
     }
 }
