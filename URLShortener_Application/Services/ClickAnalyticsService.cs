@@ -20,6 +20,8 @@ namespace URLShortener_Application.Services
             _shortUrlRepository = shortUrlRepository;
             _clickRepository = clickRepository;
         }
+
+
         public async Task<Dto_ClickSummary> GetSummaryAsync(int userId)
         {
             var totalShortUrls = await _shortUrlRepository.CountByUserAsync(userId);
@@ -40,5 +42,31 @@ namespace URLShortener_Application.Services
                 TotalExpired = expiredCount
             };
         }
+        public async Task<List<Dto_DailyClickCount>> GetLast7DaysActivityAsync(int userId)
+        {
+            var todayUtc = DateTime.UtcNow.Date;
+            var startDate = todayUtc.AddDays(-6); // inclusive
+            var endDate = todayUtc.AddDays(1);    // exclusive
+
+            var clicks = await _clickRepository.GetClicksForUserBetweenAsync(userId, startDate, endDate);
+
+            var grouped = clicks.GroupBy(c => c.ClickedAt.Date).ToDictionary(g => g.Key, g => g.LongCount());
+
+            var result = new List<Dto_DailyClickCount>();
+
+            for (int i = 0; i < 7; i++)
+            {
+                var date = startDate.AddDays(i);
+
+                result.Add(new Dto_DailyClickCount
+                {
+                    Date = date,
+                    ClickCount = grouped.ContainsKey(date)? grouped[date]: 0
+                });
+            }
+
+            return result;
+        }
     }
+
 }

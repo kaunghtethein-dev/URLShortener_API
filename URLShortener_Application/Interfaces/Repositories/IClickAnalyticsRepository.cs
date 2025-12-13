@@ -15,6 +15,7 @@ namespace URLShortener_Application.Interfaces.Repositories
         Task<IEnumerable<ClickAnalytics>> GetByShortUrlIdAsync(long shortUrlId);
         Task AddAsync(ClickAnalytics clickAnalytics);
         Task<long> GetTotalClicksByUserAsync(int userId);
+        Task<List<ClickAnalytics>> GetClicksForUserBetweenAsync(int userId,DateTime fromUtc,DateTime toUtc);
         Task<int> SaveChangesAsync();
 
     }

@@ -43,6 +43,17 @@ namespace URLShortener_Infrastructure.Repositories
                 .Where(c => c.ShortUrl!.UserId == userId)
                 .LongCountAsync();
         }
+        public async Task<List<ClickAnalytics>> GetClicksForUserBetweenAsync(int userId,DateTime fromUtc,DateTime toUtc)
+        {
+            return await _context.ClickAnalytics
+                .Where(c =>
+                    c.ShortUrl!.UserId == userId &&
+                    c.ClickedAt >= fromUtc &&
+                    c.ClickedAt < toUtc)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();

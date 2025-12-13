@@ -10,5 +10,6 @@ namespace URLShortener_Application.Interfaces.Services
     public  interface IClickAnalyticsService
     {
         Task<Dto_ClickSummary> GetSummaryAsync(int userId);
+        Task<List<Dto_DailyClickCount>> GetLast7DaysActivityAsync(int userId);
     }
 }
