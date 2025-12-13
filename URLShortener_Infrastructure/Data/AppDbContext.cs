@@ -17,6 +17,7 @@ namespace URLShortener_Infrastructure.Data
 
         public DbSet<ClickAnalytics> ClickAnalytics { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         public AppDbContext(DbContextOptions options) : base(options)
         {
             
@@ -27,6 +28,7 @@ namespace URLShortener_Infrastructure.Data
             modelBuilder.ApplyConfiguration(new ShortUrlConfiguration());
             modelBuilder.ApplyConfiguration(new ClickAnalyticsConfiguration());
             modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+
         }
 
     }

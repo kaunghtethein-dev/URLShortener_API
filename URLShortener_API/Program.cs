@@ -61,6 +61,7 @@ if (jwtSettings != null)
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShortUrlService, ShortUrlService>();
+builder.Services.AddScoped<IClickAnalyticsService, ClickAnalyticsService>();
 builder.Services.AddScoped<IQrCodeGenerator, QrCodeGenerator>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 

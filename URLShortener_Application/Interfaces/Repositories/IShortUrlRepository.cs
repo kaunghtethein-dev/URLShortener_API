@@ -15,6 +15,9 @@ namespace URLShortener_Application.Interfaces.Repositories
         Task AddAsync(ShortUrl shortUrl);
         void Update(ShortUrl shortUrl);
         void Delete(ShortUrl shortUrl);
+        Task<long> CountByUserAsync(int userId);
+        Task<long> CountActiveByUserAsync(int userId);
+        Task<long> CountExpiredByUserAsync(int userId);
         Task<int> SaveChangesAsync();
 
     }

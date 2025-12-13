@@ -54,7 +54,28 @@ namespace URLShortener_Infrastructure.Repositories
         {
             _context.ShortUrls.Remove(shortUrl);
         }
+        public Task<long> CountByUserAsync(int userId)
+        {
+            return _context.ShortUrls
+                .Where(s => s.UserId == userId)
+                .LongCountAsync();
+        }
 
+        public Task<long> CountActiveByUserAsync(int userId)
+        {
+            return _context.ShortUrls
+                .Where(s => s.UserId == userId && s.IsActive)
+                .LongCountAsync();
+        }
+
+        public Task<long> CountExpiredByUserAsync(int userId)
+        {
+            return _context.ShortUrls
+                .Where(s => s.UserId == userId &&
+                       s.ExpiresAt != null &&
+                       s.ExpiresAt <= DateTime.UtcNow)
+                .LongCountAsync();
+        }
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using URLShortener_Application.Interfaces.Repositories;
 using URLShortener_Domain.Entities;
 using URLShortener_Infrastructure.Data;
+using URLShortener_Shared.DTOs;
 
 namespace URLShortener_Infrastructure.Repositories
 {
@@ -35,7 +37,12 @@ namespace URLShortener_Infrastructure.Repositories
         {
             await _context.ClickAnalytics.AddAsync(clickAnalytics);
         }
-
+        public Task<long> GetTotalClicksByUserAsync(int userId)
+        {
+            return _context.ClickAnalytics
+                .Where(c => c.ShortUrl!.UserId == userId)
+                .LongCountAsync();
+        }
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();

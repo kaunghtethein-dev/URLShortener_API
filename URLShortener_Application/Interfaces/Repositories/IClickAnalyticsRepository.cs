@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using URLShortener_Domain.Entities;
+using URLShortener_Shared.DTOs;
+
 
 namespace URLShortener_Application.Interfaces.Repositories
 {
@@ -12,6 +14,7 @@ namespace URLShortener_Application.Interfaces.Repositories
         Task<ClickAnalytics?> GetByIdAsync(long id);
         Task<IEnumerable<ClickAnalytics>> GetByShortUrlIdAsync(long shortUrlId);
         Task AddAsync(ClickAnalytics clickAnalytics);
+        Task<long> GetTotalClicksByUserAsync(int userId);
         Task<int> SaveChangesAsync();
 
     }
