@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using URLShortener_Application.Interfaces.Repositories;
+using URLShortener_Application.Services.Helpers;
 using URLShortener_Domain.Entities;
 using URLShortener_Infrastructure.Data;
 using URLShortener_Shared.DTOs;
@@ -51,6 +52,35 @@ namespace URLShortener_Infrastructure.Repositories
                     c.ClickedAt >= fromUtc &&
                     c.ClickedAt < toUtc)
                 .AsNoTracking()
+                .ToListAsync();
+        }
+        public async Task<List<DeviceTypeCount>> GetClicksByDeviceTypeAsync(int userId)
+        {
+            return await _context.ClickAnalytics
+                .Where(c => c.ShortUrl!.UserId == userId)
+                .GroupBy(c => c.DeviceType)
+                .Select(g => new DeviceTypeCount
+                {
+                    DeviceType = g.Key!,
+                    ClickCount = g.LongCount()
+                })
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        public async Task<List<CountryClickCount>> GetClickCountsByCountryAsync(int userId)
+        {
+            return await _context.ClickAnalytics
+                .Where(c =>
+                    c.ShortUrl!.UserId == userId &&
+                    c.Country != null &&
+                    c.Country != "")
+                .GroupBy(c => c.Country!)
+                .Select(g => new CountryClickCount
+                {
+                    Country = g.Key,
+                    ClickCount = g.LongCount()
+                })
+                .OrderByDescending(x => x.ClickCount)
                 .ToListAsync();
         }
 

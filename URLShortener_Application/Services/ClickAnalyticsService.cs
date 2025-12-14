@@ -67,6 +67,71 @@ namespace URLShortener_Application.Services
 
             return result;
         }
+        public async Task<List<Dto_TopPerformingUrl>> GetTopPerformingUrlsAsync(int userId,int limit = 3)
+        {
+            var urls = await _shortUrlRepository
+                .GetTopPerformingByUserAsync(userId, limit);
+
+            var result = new List<Dto_TopPerformingUrl>();
+
+            foreach (var url in urls)
+            {
+                result.Add(new Dto_TopPerformingUrl
+                {
+                    ShortUrlId = url.ShortUrlId,
+                    ShortCode = url.ShortCode,
+                    OriginalUrl = url.OriginalUrl,
+                    ClickCount = url.ClickCount
+                });
+            }
+
+            return result;
+        }
+        public async Task<List<Dto_DeviceTypeStats>> GetDeviceTypeStatsAsync(int userId)
+        {
+            var data = await _clickRepository.GetClicksByDeviceTypeAsync(userId);
+
+            var result = new List<Dto_DeviceTypeStats>();
+
+            foreach (var item in data)
+            {
+                result.Add(new Dto_DeviceTypeStats
+                {
+                    DeviceType = item.DeviceType,
+                    ClickCount = item.ClickCount
+                });
+            }
+
+            return result;
+        }
+        public async Task<List<Dto_CountryAnalytics>> GetTopCountriesAsync(int userId, int limit = 5)
+        {
+            var data = await _clickRepository.GetClickCountsByCountryAsync(userId);
+
+            var topCountries = data
+                .Take(limit)
+                .Select(x => new Dto_CountryAnalytics
+                {
+                    Country = x.Country,
+                    Clicks = x.ClickCount
+                })
+                .ToList();
+
+            var othersClicks = data.Skip(limit).Sum(x => x.ClickCount);
+
+            if (othersClicks > 0)
+            {
+                topCountries.Add(new Dto_CountryAnalytics
+                {
+                    Country = "Others",
+                    Clicks = othersClicks
+                });
+            }
+
+            return topCountries;
+        }
+
+
     }
 
 }

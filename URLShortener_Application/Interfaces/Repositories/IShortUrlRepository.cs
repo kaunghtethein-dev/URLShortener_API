@@ -18,6 +18,7 @@ namespace URLShortener_Application.Interfaces.Repositories
         Task<long> CountByUserAsync(int userId);
         Task<long> CountActiveByUserAsync(int userId);
         Task<long> CountExpiredByUserAsync(int userId);
+        Task<List<ShortUrl>> GetTopPerformingByUserAsync(int userId,int limit);
         Task<int> SaveChangesAsync();
 
     }

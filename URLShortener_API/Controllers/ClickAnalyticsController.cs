@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using URLShortener_Application.Interfaces.Services;
+using URLShortener_Application.Services;
 using URLShortener_Shared.DTOs;
 using URLShortener_Shared.Wrappers;
 
@@ -65,6 +66,79 @@ namespace URLShortener_API.Controllers
             }
             
         }
+
+        [HttpGet("topurls")]
+        [Authorize]
+        public async Task<ActionResult<DataResult<List<Dto_TopPerformingUrl>>>> GetTopUrls()
+        {
+            try
+            {
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return Unauthorized(DataResult<string>.FailResult("Unauthorized", StatusCodes.Status401Unauthorized));
+                }
+
+                int userId = int.Parse(userIdClaim);
+
+                var data = await _analyticsService.GetTopPerformingUrlsAsync(userId, 3);
+
+                return Ok(DataResult<List<Dto_TopPerformingUrl>>.SuccessResult(data,"Success"));
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, DataResult<string>.FailResult(ex.InnerException?.Message ?? ex.Message, StatusCodes.Status500InternalServerError));
+            }
+            
+        }
+        [HttpGet("devicetypes")]
+        [Authorize]
+        public async Task<ActionResult<DataResult<List<Dto_DeviceTypeStats>>>> GetDeviceTypes()
+        {
+            try
+            {
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return Unauthorized(DataResult<string>.FailResult("Unauthorized", StatusCodes.Status401Unauthorized));
+                }
+
+                int userId = int.Parse(userIdClaim);
+                var data = await _analyticsService.GetDeviceTypeStatsAsync(userId);
+
+                return Ok(DataResult<List<Dto_DeviceTypeStats>>.SuccessResult(data, "Success"));
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, DataResult<string>.FailResult(ex.InnerException?.Message ?? ex.Message, StatusCodes.Status500InternalServerError));
+            }
+            
+        }
+        [HttpGet("topcountries")]
+        [Authorize]
+        public async Task<ActionResult<DataResult<List<Dto_CountryAnalytics>>>> GetTopCountries()
+        {
+            try
+            {
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return Unauthorized(DataResult<string>.FailResult("Unauthorized", StatusCodes.Status401Unauthorized));
+                }
+
+                int userId = int.Parse(userIdClaim);
+
+                var result = await _analyticsService.GetTopCountriesAsync(userId, 5);
+
+                return Ok(DataResult<List<Dto_CountryAnalytics>>.SuccessResult(result));
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, DataResult<string>.FailResult(ex.InnerException?.Message ?? ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
+
+
 
     }
 

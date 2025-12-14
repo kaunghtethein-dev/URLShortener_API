@@ -76,6 +76,16 @@ namespace URLShortener_Infrastructure.Repositories
                        s.ExpiresAt <= DateTime.UtcNow)
                 .LongCountAsync();
         }
+        public async Task<List<ShortUrl>> GetTopPerformingByUserAsync(int userId,int limit)
+        {
+            return await _context.ShortUrls
+                .Where(s =>s.UserId == userId && s.IsActive)
+                .OrderByDescending(s => s.ClickCount)
+                .Take(limit)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();

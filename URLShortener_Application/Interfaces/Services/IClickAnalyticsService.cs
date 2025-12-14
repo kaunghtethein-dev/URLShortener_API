@@ -11,5 +11,8 @@ namespace URLShortener_Application.Interfaces.Services
     {
         Task<Dto_ClickSummary> GetSummaryAsync(int userId);
         Task<List<Dto_DailyClickCount>> GetLast7DaysActivityAsync(int userId);
+        Task<List<Dto_TopPerformingUrl>> GetTopPerformingUrlsAsync(int userId, int limit);
+        Task<List<Dto_DeviceTypeStats>> GetDeviceTypeStatsAsync(int userId);
+        Task<List<Dto_CountryAnalytics>> GetTopCountriesAsync(int userId, int limit);
     }
 }
