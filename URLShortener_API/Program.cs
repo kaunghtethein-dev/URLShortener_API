@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -14,8 +15,10 @@ using URLShortener_Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient<IGeoService, GeoService>();
-// CORS policy
+// MUST be before reading config
+builder.Configuration.AddEnvironmentVariables();
+
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -25,14 +28,13 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
-// Add controllers
+
 builder.Services.AddControllers();
 
-// Configure JWT settings
+// JWT settings
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 
-// Configure Authentication & JWT Bearer
 if (jwtSettings != null)
 {
     builder.Services.AddAuthentication(options =>
@@ -42,7 +44,7 @@ if (jwtSettings != null)
     })
     .AddJwtBearer(options =>
     {
-        options.RequireHttpsMetadata = false; // for local dev only
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
         options.SaveToken = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -52,36 +54,34 @@ if (jwtSettings != null)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtSettings.Issuer,
             ValidAudience = jwtSettings.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings.Key))
         };
     });
 }
 
-// Register Infrastructure & Application services
+// DI
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShortUrlService, ShortUrlService>();
 builder.Services.AddScoped<IClickAnalyticsService, ClickAnalyticsService>();
 builder.Services.AddScoped<IQrCodeGenerator, QrCodeGenerator>();
 builder.Services.AddScoped<JwtTokenGenerator>();
+builder.Services.AddHttpClient<IGeoService, GeoService>();
 
-
-// Enable Swagger
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    // Add security definition for JWT
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer",
         BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter JWT token like: Bearer {your token}"
+        In = ParameterLocation.Header
     });
 
-    // Add security requirement
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -93,26 +93,32 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
 
 var app = builder.Build();
 
-// Configure middleware pipeline
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// MUST be first
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto
+});
+
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors("AllowAll");
-// Enable Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();

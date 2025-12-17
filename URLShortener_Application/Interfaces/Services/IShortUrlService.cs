@@ -11,7 +11,7 @@ namespace URLShortener_Application.Interfaces.Services
     {
         Task<Dto_ShortUrl> CreateShortUrlAsync(Dto_CreateShortUrl dto);
         Task<Dto_ShortUrl?> GetByShortCodeAsync(string shortCode);
-        Task<IEnumerable<Dto_ShortUrl>> GetByUserIdAsync(int userId);
+        Task<List<Dto_ShortUrl>> GetByUserIdAsync(int userId);
         Task<Dto_ShortUrl?> GetByIdAsync(long id);
         Task<Dto_ShortUrl?> UpdateShortUrlAsync(Dto_UpdateShortUrl dto, int currentUserId);
         Task<bool> DeleteShortUrlAsync(long id, int currentUserId);

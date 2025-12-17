@@ -56,20 +56,20 @@ namespace URLShortener_API.Controllers
         }
         [Authorize]
         [HttpGet("getbyuser")]
-        public async Task<ActionResult<DataResult<IEnumerable<Dto_ShortUrl>>>> GetUserShortUrls()
+        public async Task<ActionResult<DataResult<List<Dto_ShortUrl>>>> GetUserShortUrls()
         {
             try
             {
                 var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
                 if (string.IsNullOrEmpty(userIdClaim))
                 {
-                    return Unauthorized(DataResult<IEnumerable<Dto_ShortUrl>>.FailResult("Unauthorized", StatusCodes.Status401Unauthorized));
+                    return Unauthorized(DataResult<List<Dto_ShortUrl>>.FailResult("Unauthorized", StatusCodes.Status401Unauthorized));
                 }
                     
                 int userId = int.Parse(userIdClaim);
                 var urls = await _shortUrlService.GetByUserIdAsync(userId);
 
-                return Ok(DataResult<IEnumerable<Dto_ShortUrl>>.SuccessResult(urls, "Success", StatusCodes.Status200OK));
+                return Ok(DataResult<List<Dto_ShortUrl>>.SuccessResult(urls, "Success", StatusCodes.Status200OK));
             }
             catch (Exception ex) 
             {

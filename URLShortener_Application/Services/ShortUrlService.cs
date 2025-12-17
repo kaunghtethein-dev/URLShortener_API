@@ -117,7 +117,7 @@ namespace URLShortener_Application.Services
             }
                 
 
-            string fullShortUrl = $"https://myshortener.com/{shortUrl.ShortCode}";
+            string fullShortUrl = $"https://urlink.dev/{shortUrl.ShortCode}";
 
             return _qrCodeGenerator.GenerateQrCode(fullShortUrl);
         }
@@ -160,7 +160,7 @@ namespace URLShortener_Application.Services
             };
         }
 
-        public async Task<IEnumerable<Dto_ShortUrl>> GetByUserIdAsync(int userId)
+        public async Task<List<Dto_ShortUrl>> GetByUserIdAsync(int userId)
         {
             var entities = await _shortUrlRepository.GetByUserIdAsync(userId);
             var dtos = new List<Dto_ShortUrl>();
