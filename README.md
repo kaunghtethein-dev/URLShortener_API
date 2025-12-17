@@ -32,7 +32,6 @@ This project aims to replicate the core functionality of Bit.ly, demonstrating p
 - Scalable architecture  
 - Clean code practices  
 - Repository and service patterns  
-- Database migrations and seeding  
 
 The frontend (Blazor WebAssembly) is developed in a **separate repository**.
 
@@ -40,5 +39,5 @@ The frontend (Blazor WebAssembly) is developed in a **separate repository**.
 
 ## Status
 
-Currently in active development.  
+Completed  
 
