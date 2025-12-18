@@ -21,7 +21,7 @@ namespace URLShortener_API.Controllers
 
         [Authorize]
         [HttpGet("getsummary")]
-        public async Task<ActionResult<DataResult<Dto_ClickSummary>>> GetSummary()
+        public async Task<ActionResult> GetSummary()
         {
             try
             {
@@ -44,7 +44,7 @@ namespace URLShortener_API.Controllers
 
         [HttpGet("getlast7days")]
         [Authorize]
-        public async Task<ActionResult<DataResult<List<Dto_DailyClickCount>>>> GetLast7Days()
+        public async Task<ActionResult> GetLast7Days()
         {
             try
             {
@@ -69,7 +69,7 @@ namespace URLShortener_API.Controllers
 
         [HttpGet("topurls")]
         [Authorize]
-        public async Task<ActionResult<DataResult<List<Dto_TopPerformingUrl>>>> GetTopUrls()
+        public async Task<ActionResult> GetTopUrls()
         {
             try
             {
@@ -93,7 +93,7 @@ namespace URLShortener_API.Controllers
         }
         [HttpGet("devicetypes")]
         [Authorize]
-        public async Task<ActionResult<DataResult<List<Dto_DeviceTypeStats>>>> GetDeviceTypes()
+        public async Task<ActionResult> GetDeviceTypes()
         {
             try
             {
@@ -116,7 +116,7 @@ namespace URLShortener_API.Controllers
         }
         [HttpGet("topcountries")]
         [Authorize]
-        public async Task<ActionResult<DataResult<List<Dto_CountryAnalytics>>>> GetTopCountries()
+        public async Task<ActionResult> GetTopCountries()
         {
             try
             {

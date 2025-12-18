@@ -20,7 +20,7 @@ namespace URLShortener_API.Controllers
             _shortUrlService = shortUrlService;
         }
         [HttpPost("create")]
-        public async Task<ActionResult<DataResult<Dto_ShortUrl>>> CreateShortUrl([FromBody] Dto_CreateShortUrl dto)
+        public async Task<ActionResult> CreateShortUrl([FromBody] Dto_CreateShortUrl dto)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace URLShortener_API.Controllers
         }
         [Authorize]
         [HttpGet("getbyuser")]
-        public async Task<ActionResult<DataResult<List<Dto_ShortUrl>>>> GetUserShortUrls()
+        public async Task<ActionResult> GetUserShortUrls()
         {
             try
             {
@@ -80,7 +80,7 @@ namespace URLShortener_API.Controllers
 
         [Authorize]
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<DataResult<Dto_ShortUrl>>> GetById(long id)
+        public async Task<ActionResult> GetById(long id)
         {
             try
             {
@@ -115,7 +115,7 @@ namespace URLShortener_API.Controllers
 
         [Authorize]
         [HttpPut("update/{id:long}")]
-        public async Task<ActionResult<DataResult<Dto_ShortUrl>>> Update(long id, [FromBody] Dto_UpdateShortUrl dto)
+        public async Task<ActionResult> Update(long id, [FromBody] Dto_UpdateShortUrl dto)
         {
             try
             {

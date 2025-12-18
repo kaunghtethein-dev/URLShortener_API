@@ -47,7 +47,7 @@ namespace URLShortener_API.Controllers
         }
         // Check if there is already a user with the email
         [HttpGet("checkuserexist/{email}")]
-        public async Task<ActionResult<DataResult<bool>>> CheckUserAlreadyExists(string email)
+        public async Task<ActionResult> CheckUserAlreadyExists(string email)
         {
             if (!ModelState.IsValid)
             {
@@ -59,7 +59,7 @@ namespace URLShortener_API.Controllers
 
         // Log in existing user, POST: api/user/login
         [HttpPost("login")]
-        public async Task<ActionResult<DataResult<Dto_AuthResponse>>> LoginUser([FromBody] Dto_LoginUser dto)
+        public async Task<ActionResult> LoginUser([FromBody] Dto_LoginUser dto)
         {
             try
             {
@@ -84,7 +84,7 @@ namespace URLShortener_API.Controllers
         }
 
         [HttpPost("refresh")]
-        public async Task<ActionResult<DataResult<Dto_AuthResponse>>> RefreshToken([FromBody] Dto_RefreshRequest dto)
+        public async Task<ActionResult> RefreshToken([FromBody] Dto_RefreshRequest dto)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace URLShortener_API.Controllers
         // GET: api/user/getuser
         [Authorize]
         [HttpGet("getuser")]
-        public async Task<ActionResult<DataResult<Dto_User>>> GetCurrentUser()
+        public async Task<ActionResult> GetCurrentUser()
         {
             try
             {
