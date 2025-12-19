@@ -40,11 +40,29 @@ namespace URLShortener_API.Controllers
             }
         }
 
+        //private string? GetClientIp()
+        //{
+        //    if (Request.Headers.TryGetValue("CF-Connecting-IP", out var cfIp))
+        //    {
+        //        return cfIp.ToString();
+        //    }
+        //    return HttpContext.Connection.RemoteIpAddress?.ToString();
+        //}
         private string? GetClientIp()
         {
             if (Request.Headers.TryGetValue("CF-Connecting-IP", out var cfIp))
             {
-                return cfIp.ToString();
+                return cfIp.FirstOrDefault();
+            }
+
+            if (Request.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
+            {
+                var ipList = forwardedFor.FirstOrDefault()?.Split(',');
+                return ipList?.FirstOrDefault()?.Trim();
+            }
+            if (Request.Headers.TryGetValue("X-Real-IP", out var realIp))
+            {
+                return realIp.FirstOrDefault();
             }
             return HttpContext.Connection.RemoteIpAddress?.ToString();
         }
